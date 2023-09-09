@@ -1,0 +1,8 @@
+---
+# handlers file for deploy_nginx_and_nodeexporter
+- name: Restart Nginx Debian
+  service: name=nginx state=restared
+  when: ansible_os_family == "Debian"
+- name: Restart Nginx RedHat
+  service: name=nginx state=restared
+  when: ansible_os_family == "RedHat"  

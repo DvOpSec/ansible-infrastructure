@@ -1,0 +1,174 @@
+---
+# tasks file for deploy_nginx_and_nodeexporter
+
+- block: ##  BLOCK FOR DEBIAN  ##
+    - name: Update APT
+      apt:
+      update_cache: yes
+      become: yes
+
+    - name: Install dependecies
+      apt:
+        name: "{{ item }}"
+        state: present
+      become: yes
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+
+    - name: Install Docker
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable
+        state: present
+      become: yes
+
+    - name: Add GPG Docker key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: latest
+      become: yes
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: latest
+      become: yes
+
+    - name: Run Docker as deamon 
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Install Node Exporter
+      get_url:
+        url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+        dest: /tmp/node_exporter.tar.gz
+      vars:
+        node_exporter_version: 1.6.1  
+
+    - name: Untar Node Exporter
+      ansible.builtin.unarchive:
+        src: /tmp/node_exporter.tar.gz
+        dest: /opt/
+        remote_src: yes
+      become: yes
+
+    - name: Create user for Node Exporter
+      user:
+        name: node_exporter
+        system: yes
+      become: yes
+
+    - name: Systemd deamon for Node Exporter
+      systemd:
+        name: node_exporter
+        daemon_reload: yes
+        enabled: yes
+        state: started
+        user: node_exporter
+        executable: /opt/node_exporter/node_exporter
+        args:
+          - '--collector.textfile.directory=/var/lib/node_exporter/textfile_collector'
+      become: yes
+
+    - name: Remove temp files
+      file:
+        path: /tmp/node_exporter.tar.gz
+        state: absent
+      become: yes
+
+    - name: Install Nginx on Debian
+      apt:   
+        name: nginx
+        state: latest
+
+    - name: Restart Nginx on Debian
+      service: 
+        name: docker-ce
+        state: present
+        enabled: yes 
+   
+  when: ansible_os_family == "Debian"  
+
+- block: ##  BLOCK FOR ALMALINUX  ##
+    - name: Update DNF
+      dnf:
+        update_cache: yes
+      become: yes
+
+    - name: Install dependecies
+      dnf:
+        name: "{{ item }}"
+        state: present
+      become: yes
+      with_items:
+        - dnf-plugins-core
+        - curl
+
+    - name: Install Docker
+      dnf:
+        name: docker-ce
+        state: latest
+      become: yes
+
+    - name: Run docker as deamon
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Install Node Exporter
+      get_url:
+        url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+        dest: /tmp/node_exporter.tar.gz
+      vars:
+        node_exporter_version: 1.6.1  # Замените версию на актуальную
+
+    - name: Untar Node Exporter
+      ansible.builtin.unarchive:
+        src: /tmp/node_exporter.tar.gz
+        dest: /opt/
+        remote_src: yes
+      become: yes
+
+    - name: Create user for Node Exporter
+      user:
+        name: node_exporter
+        system: yes
+      become: yes
+
+    - name: Systemd deamon for Node Exporter
+      systemd:
+        name: node_exporter
+        daemon_reload: yes
+        enabled: yes
+        state: started
+        user: node_exporter
+        executable: /opt/node_exporter/node_exporter
+        args:
+          - '--collector.textfile.directory=/var/lib/node_exporter/textfile_collector'
+      become: yes
+
+    - name: Remove temp files 
+      file:
+        path: /tmp/node_exporter.tar.gz
+        state: absent
+      become: yes
+
+    - name: Install Nginx on AlmaLinux
+      dnf: 
+        name: nginx 
+        state: latest
+
+    - name: Restart Nginx on AlmaLinux
+      service: 
+        name: nginx
+        state: restarted 
+        enabled: yes
+
+  when: ansible_os_family == "AlmaLinux"   
