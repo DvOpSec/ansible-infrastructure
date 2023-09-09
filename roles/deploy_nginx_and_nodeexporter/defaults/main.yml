@@ -1,0 +1,4 @@
+---
+# defaults file for deploy_nginx_and_nodeexporter
+destin_nginx: /etc/nginx/sites-enabled/
+destin_nodeEx: 
