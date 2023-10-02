@@ -1,3 +1,3 @@
 [PROD_SERVERS_WEB]
-ubuntu1 
-centos2 
+ubuntu1 10.42.0.95
+almalinux2 10.42.0.177
