@@ -92,7 +92,7 @@
         state: present
         enabled: yes 
    
-  when: ansible_os_family == "Debian"  
+  when: ansible_pkg_mgr == "apt"  
 
 - block: ##  BLOCK FOR ALMALINUX  ##
     - name: Update DNF
@@ -171,4 +171,4 @@
         state: restarted 
         enabled: yes
 
-  when: ansible_os_family == "AlmaLinux"   
+  when: ansible_pkg_mgr == "dnf"   
