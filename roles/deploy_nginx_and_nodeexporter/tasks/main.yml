@@ -81,16 +81,29 @@
         state: absent
       become: yes
 
-    - name: Install Nginx on Debian
-      apt:   
-        name: nginx
-        state: latest
+    - name: Copy Nginx configuration file
+      copy:
+        src: nginx.conf
+        dest: /root/nginx/nginx.conf
+        mode: '0444'
+      notify: restart nginx
 
-    - name: Restart Nginx on Debian
-      service: 
-        name: docker-ce
+    - name: Pull Nginx image
+      docker_image:
+        name: nginx
         state: present
-        enabled: yes 
+
+    - name: Create Nginx container
+      docker_container:
+        name: nginx
+        image: nginx
+        state: started
+        restart_policy: always
+        ports:
+          - "80:80"
+        volumes:
+          - /root/nginx:/etc/nginx/sites-available:ro
+          - /root/nginx/logs:/var/log/nginx
    
   when: ansible_pkg_mgr == "apt"  
 
@@ -160,15 +173,28 @@
         state: absent
       become: yes
 
-    - name: Install Nginx on AlmaLinux
-      dnf: 
-        name: nginx 
-        state: latest
+    - name: Copy Nginx configuration file
+      copy:
+        src: nginx.conf
+        dest: /root/nginx/nginx.conf
+        mode: '0444'
+      notify: restart nginx
 
-    - name: Restart Nginx on AlmaLinux
-      service: 
+    - name: Pull Nginx image
+      docker_image:
         name: nginx
-        state: restarted 
-        enabled: yes
+        state: present
+
+    - name: Create Nginx container
+      docker_container:
+        name: nginx
+        image: nginx
+        state: started
+        restart_policy: always
+        ports:
+          - "80:80"
+        volumes:
+          - /root/nginx:/etc/nginx/sites-available:ro
+          - /root/nginx/logs:/var/log/nginx
 
   when: ansible_pkg_mgr == "dnf"   
