@@ -1,0 +1,5 @@
+---
+- name: Restart Nginx Debian
+  become: yes
+  roles:
+    - deploy_nginx_and_nodeexporter  
