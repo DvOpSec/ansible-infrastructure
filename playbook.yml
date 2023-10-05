@@ -48,7 +48,7 @@
       become: yes
 
     - name: Переименовать папку Node Exporter
-      command: mv /opt/node_exporter-* /opt/node_exporter
+      shell: mv /opt/node_exporter-* /opt/node_exporter
       become: yes
 
     - name: Создать systemd unit для Node Exporter

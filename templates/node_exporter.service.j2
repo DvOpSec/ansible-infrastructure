@@ -1,0 +1,14 @@
+[Unit]
+Description=Node Exporter
+After=network.target
+
+[Service]
+ExecStart=/opt/node_exporter/node_exporter \
+  --collector.cpu \
+  --collector.diskstats \
+  --collector.netdev
+User=nobody
+Restart=always
+
+[Install]
+WantedBy=default.target
