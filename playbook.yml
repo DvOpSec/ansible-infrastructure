@@ -1,120 +1,121 @@
 ---
 - name: Restart Nginx Debian
   become: yes
- 
-  - block: ##  BLOCK FOR DEBIAN  ##
-    - name: Update APT
-      apt:
-        update_cache: yes
-      become: yes
 
-    - name: Install dependecies
-      apt:
-        name: "{{ item }}"
-        state: present
-      become: yes
-      with_items:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - software-properties-common
+  tasks:
+      - block: ##  BLOCK FOR DEBIAN  ##
+          - name: Update APT
+            apt:
+              update_cache: yes
+            become: yes
 
-    - name: Copy Nginx configuration file
-      copy:
-        src: nginx.conf
-        dest: /root/nginx/nginx.conf
-        mode: '0444'
-      notify: restart nginx
+          - name: Install dependecies
+            apt:
+              name: "{{ item }}"
+              state: present
+            become: yes
+            with_items:
+              - apt-transport-https
+              - ca-certificates
+              - curl
+              - software-properties-common
 
-    - name: Create Nginx container
-      docker_container:
-        name: nginx
-        image: nginx
-        state: started
-        restart_policy: always
-        ports:
-          - "80:80"
-        volumes:
-          - /root/nginx:/etc/nginx/sites-available:ro
-          - /root/nginx/logs:/var/log/nginx
-   
+          - name: Copy Nginx configuration file
+            copy:
+              src: nginx.conf
+              dest: /root/nginx/nginx.conf
+              mode: '0444'
+            notify: restart nginx
+
+          - name: Create Nginx container
+            docker_container:
+              name: nginx
+              image: nginx
+              state: started
+              restart_policy: always
+              ports:
+                - "80:80"
+              volumes:
+                - /root/nginx:/etc/nginx/sites-available:ro
+                - /root/nginx/logs:/var/log/nginx
+        
   when: ansible_pkg_mgr == "apt"  
 
-- block: ##  BLOCK FOR ALMALINUX  ##
-    - name: Update DNF
-      dnf:
-        update_cache: yes
-      become: yes
+  - block: ##  BLOCK FOR ALMALINUX  ##
+      - name: Update DNF
+        dnf:
+          update_cache: yes
+        become: yes
 
-    - name: Install dependecies
-      dnf:
-        name: "{{ item }}"
-        state: present
-      become: yes
-      with_items:
-        - dnf-plugins-core
-        - curl
+      - name: Install dependecies
+        dnf:
+          name: "{{ item }}"
+          state: present
+        become: yes
+        with_items:
+          - dnf-plugins-core
+          - curl
 
-    - name: Add Docker repository key
-      dnf_key:
-        url: https://download.docker.com/linux/centos/gpg
-        state: present
+      - name: Add Docker repository key
+        dnf_key:
+          url: https://download.docker.com/linux/centos/gpg
+          state: present
 
-    - name: Add Docker repository
-      dnf_repository:
-        name: docker
-        description: Docker Repository
-        baseurl: https://download.docker.com/linux/centos/8/$basearch/stable
-        gpgcheck: yes
-        gpgkey: https://download.docker.com/linux/centos/gpg
-        enabled: yes
-    
-    - name: Install Docker
-      dnf:
-        name: docker-ce
-        state: present
+      - name: Add Docker repository
+        dnf_repository:
+          name: docker
+          description: Docker Repository
+          baseurl: https://download.docker.com/linux/centos/8/$basearch/stable
+          gpgcheck: yes
+          gpgkey: https://download.docker.com/linux/centos/gpg
+          enabled: yes
+      
+      - name: Install Docker
+        dnf:
+          name: docker-ce
+          state: present
 
-    - name: Run docker as deamon
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
-      become: yes
+      - name: Run docker as deamon
+        systemd:
+          name: docker
+          state: started
+          enabled: yes
+        become: yes
 
-    - name: Install Node Exporter
-      get_url:
-        url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
-        dest: /tmp/node_exporter.tar.gz
-      vars:
-        node_exporter_version: 1.6.1  # Замените версию на актуальную
+      - name: Install Node Exporter
+        get_url:
+          url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+          dest: /tmp/node_exporter.tar.gz
+        vars:
+          node_exporter_version: 1.6.1  # Замените версию на актуальную
 
-    - name: Untar Node Exporter
-      ansible.builtin.unarchive:
-        src: /tmp/node_exporter.tar.gz
-        dest: /opt/
-        remote_src: yes
-      become: yes
+      - name: Untar Node Exporter
+        ansible.builtin.unarchive:
+          src: /tmp/node_exporter.tar.gz
+          dest: /opt/
+          remote_src: yes
+        become: yes
 
-    - name: Create user for Node Exporter
-      user:
-        name: node_exporter
-        system: yes
-      become: yes
+      - name: Create user for Node Exporter
+        user:
+          name: node_exporter
+          system: yes
+        become: yes
 
-    - name: Systemd deamon for Node Exporter
-      systemd:
-        name: node_exporter
-        daemon_reload: yes
-        enabled: yes
-        state: started
-        user: node_exporter
-        executable: /opt/node_exporter/node_exporter
-        args:
-          - '--collector.textfile.directory=/var/lib/node_exporter/textfile_collector'
-      become: yes
+      - name: Systemd deamon for Node Exporter
+        systemd:
+          name: node_exporter
+          daemon_reload: yes
+          enabled: yes
+          state: started
+          user: node_exporter
+          executable: /opt/node_exporter/node_exporter
+          args:
+            - '--collector.textfile.directory=/var/lib/node_exporter/textfile_collector'
+        become: yes
 
-    - name: Remove temp files 
-      file:
+      - name: Remove temp files 
+        file:
         path: /tmp/node_exporter.tar.gz
         state: absent
       become: yes
