@@ -58,13 +58,6 @@
       notify:
         - Restart Node Exporter
 
-    - name: Открыть порт 9000 в файрволе
-      ansible.builtin.firewalld:
-        port: 9000/tcp
-        permanent: yes
-        state: enabled
-      become: yes
-
     - name: Запустить Node Exporter и настроить автозапуск
       service:
         name: node_exporter
