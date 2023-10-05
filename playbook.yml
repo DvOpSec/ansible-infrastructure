@@ -35,13 +35,41 @@
         enabled: yes
         state: started
 
-    - name: Установить Node Exporter в Docker-контейнере
-      docker_container:
+    - name: Скачать Node Exporter
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v2.3.0/node_exporter-2.3.0.linux-amd64.tar.gz"
+        dest: "/tmp/node_exporter.tar.gz"
+
+    - name: Распаковать Node Exporter
+      ansible.builtin.unarchive:
+        src: "/tmp/node_exporter.tar.gz"
+        dest: "/opt/"
+        remote_src: yes
+      become: yes
+
+    - name: Переименовать папку Node Exporter
+      command: mv /opt/node_exporter-* /opt/node_exporter
+      become: yes
+
+    - name: Создать systemd unit для Node Exporter
+      template:
+        src: node_exporter.service.j2
+        dest: /etc/systemd/system/node_exporter.service
+      notify:
+        - Restart Node Exporter
+
+    - name: Открыть порт 9000 в файрволе
+      ansible.builtin.firewalld:
+        port: 9000/tcp
+        permanent: yes
+        state: enabled
+      become: yes
+
+    - name: Запустить Node Exporter и настроить автозапуск
+      service:
         name: node_exporter
-        image: prom/node-exporter
-        ports:
-          - "9100:9100"
-        restart_policy: always
+        enabled: yes
+        state: started
 
     - name: Установить Nginx в Docker-контейнере
       docker_container:
