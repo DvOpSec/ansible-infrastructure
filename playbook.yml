@@ -55,15 +55,13 @@
       template:
         src: node_exporter.service.j2
         dest: /etc/systemd/system/node_exporter.service
-      notify:
-        - Restart Node Exporter
 
     - name: Запустить Node Exporter и настроить автозапуск
       service:
         name: node_exporter
         enabled: yes
         state: started
-        
+
     - name: Создать директорию для пользовательских конфигов Nginx
       file:
         path: /nginx/config
@@ -81,5 +79,5 @@
         ports:
           - "80:80"
         volumes:
-          - /nginx/config/nginx.conf:/etc/nginx/sites-available/nginx.conf
+          - /nginx/config/nginx.conf:/etc/nginx/conf.d/nginx.conf
         restart_policy: always
