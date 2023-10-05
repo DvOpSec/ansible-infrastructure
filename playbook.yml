@@ -63,6 +63,16 @@
         name: node_exporter
         enabled: yes
         state: started
+        
+    - name: Создать директорию для пользовательских конфигов Nginx
+      file:
+        path: /nginx/config
+        state: directory
+
+    - name: Копировать пользовательский файл конфигурации Nginx в контейнер
+      copy:
+        src: nginx.conf
+        dest: /nginx/config/nginx.conf
 
     - name: Установить Nginx в Docker-контейнере
       docker_container:
@@ -70,4 +80,6 @@
         image: nginx
         ports:
           - "80:80"
+        volumes:
+          - /nginx/config/nginx.conf:/etc/nginx/sites-available/nginx.conf
         restart_policy: always
