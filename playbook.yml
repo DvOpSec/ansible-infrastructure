@@ -37,7 +37,7 @@
 
     - name: Скачать Node Exporter
       get_url:
-        url: "https://github.com/prometheus/node_exporter/releases/download/v2.3.0/node_exporter-2.3.0.linux-amd64.tar.gz"
+        url: "https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz"
         dest: "/tmp/node_exporter.tar.gz"
 
     - name: Распаковать Node Exporter
