@@ -1,8 +1,0 @@
----
-# handlers file for deploy_nginx_and_nodeexporter
-- name: Restart Nginx Debian
-  service: name=nginx state=restared
-  when: ansible_pkg_mgr == "apt"  
-- name: Restart Nginx RedHat
-  service: name=nginx state=restared
-  when: ansible_pkg_mgr == "dnf"   
