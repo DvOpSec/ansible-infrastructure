@@ -17,7 +17,7 @@
         - ca-certificates
         - curl
         - software-properties-common
-        
+
     - name: Add GPG Docker key
       apt_key:
         url: https://download.docker.com/linux/debian/gpg
@@ -28,13 +28,6 @@
       apt_repository:
         repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable
         state: present
-      become: yes
-
-   
-    - name: Install Docker
-      apt:
-        name: docker-ce
-        state: latest
       become: yes
 
     - name: Run Docker as deamon 
