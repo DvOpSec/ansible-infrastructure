@@ -4,7 +4,7 @@
   become: yes
   
   tasks:
-    - block: #===Debian===#
+    - block: #===AlmaLinux===#
         - name: Обновить кеш пакетов
           dnf:
             update_cache: yes
@@ -95,7 +95,7 @@
 
       when: ansible_pkg_mgr == "dnf"    
 
-    - block:
+    - block:  #===Debian\Ubuntu===#
         - name: Обновить кеш пакетов
           apt:
             update_cache: yes
