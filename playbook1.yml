@@ -1,0 +1,84 @@
+---
+- name: Установка Docker, Node Exporter и Nginx в контейнерах на Alma Linux
+  hosts: all
+  become: yes
+  tasks:
+    - name: Обновить кеш пакетов
+      dnf:
+        name: '*'
+        state: latest
+      become: yes
+
+    - name: Установить зависимости
+      dnf:
+        name:
+          - dnf-plugins-core
+          - curl
+        state: present
+      become: yes
+
+    - name: Установить Docker
+      dnf:
+        name: docker-ce
+        state: present
+      become: yes
+
+    - name: Запустить сервис Docker и настроить автозапуск
+      service:
+        name: docker
+        enabled: yes
+        state: started
+      become: yes
+
+    - name: Скачать Node Exporter
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz"
+        dest: "/tmp/node_exporter.tar.gz"
+      become: yes
+
+    - name: Распаковать Node Exporter
+      ansible.builtin.unarchive:
+        src: "/tmp/node_exporter.tar.gz"
+        dest: "/opt/"
+        remote_src: yes
+      become: yes
+
+    - name: Переименовать папку Node Exporter
+      command: mv /opt/node_exporter-* /opt/node_exporter
+      become: yes
+
+    - name: Создать systemd unit для Node Exporter
+      template:
+        src: node_exporter.service.j2
+        dest: /etc/systemd/system/node_exporter.service
+      become: yes
+
+    - name: Запустить Node Exporter и настроить автозапуск
+      service:
+        name: node_exporter
+        enabled: yes
+        state: started
+      become: yes
+
+    - name: Создать директорию для пользовательских конфигов Nginx
+      file:
+        path: /nginx/config
+        state: directory
+      become: yes
+
+    - name: Копировать пользовательский файл конфигурации Nginx в контейнер
+      copy:
+        src: nginx.conf
+        dest: /nginx/config/nginx.conf
+      become: yes
+
+    - name: Установить Nginx в Docker-контейнере
+      docker_container:
+        name: nginx
+        image: nginx
+        ports:
+          - "80:80"
+        volumes:
+          - /nginx/config/nginx.conf:/etc/nginx/conf.d/nginx.conf
+        restart_policy: always
+      become: yes
