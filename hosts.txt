@@ -1,3 +1,2 @@
-[PROD_SERVERS_WEB]
-ubuntu1 10.42.0.95
-almalinux2 10.42.0.177
+10.42.0.95
+10.42.0.177
