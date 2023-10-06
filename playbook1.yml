@@ -24,12 +24,19 @@
     - name: Установить зависимости
       dnf:
         name:
+          - containerd.io
           - docker-ce   
           - docker-ce-cli
-          - containerd.io
           - docker-compose-plugin
         state: present
+        args: --allowerasing
       become: yes
+      
+    - name: Запустить сервис Docker и настроить автозапуск
+      service:
+        name: docker
+        enabled: yes
+        state: started
 
     - name: Скачать Node Exporter
       get_url:
