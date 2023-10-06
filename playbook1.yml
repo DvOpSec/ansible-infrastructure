@@ -87,6 +87,6 @@
         ports:
           - "80:80"
         volumes:
-          - /nginx/config/nginx.conf:/etc/nginx/conf.d/nginx.conf
+          - /nginx/config/:/etc/nginx/conf.d/:ro
         restart_policy: always
       become: yes
