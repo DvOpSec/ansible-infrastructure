@@ -29,9 +29,9 @@
           - docker-ce-cli
           - docker-compose-plugin
         state: present
-        args: --allowerasing
+        allowerasing: yes
       become: yes
-      
+
     - name: Запустить сервис Docker и настроить автозапуск
       service:
         name: docker
