@@ -107,14 +107,17 @@
               - ca-certificates
               - curl
               - software-properties-common
+              - gnupg
             state: present
 
-        - name: Установить Docker
+        - name: Добавить репозиторий Docker
           apt_repository:
             repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable
             state: present
-          notify: 
-            - Update apt and install docker-ce
+
+        - name: Добавить репозиторий Docker
+          shell: sudo install -m 0755 -d /etc/apt/keyrings & curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg & sudo chmod a+r /etc/apt/keyrings/docker.gpg
+          become: yes
 
         - name: Update apt and install docker-ce
           apt:
