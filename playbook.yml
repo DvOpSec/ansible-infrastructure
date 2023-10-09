@@ -117,10 +117,10 @@
             mode: '0755'  # устанавливаем права доступа для выполнения
 
         - name: Выполнение sh-скрипта
-          shell: docker_install.sh
+          shell: /root/docker_install.sh
 
         - name: Удаление sh-скрипта
-          shell: rm docker_install.sh
+          shell: rm /root/docker_install.sh
 
         - name: Update apt and install docker-ce
           apt:
