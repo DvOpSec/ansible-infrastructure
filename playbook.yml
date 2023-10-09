@@ -110,14 +110,14 @@
               - gnupg
             state: present
 
-        - name: Добавить репозиторий Docker
+        - name: Добавить репозиторий Docker 1
+          shell: sudo install -m 0755 -d /etc/apt/keyrings & curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg & sudo chmod a+r /etc/apt/keyrings/docker.gpg
+          become: yes
+
+        - name: Добавить репозиторий Docker 2
           apt_repository:
             repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable
             state: present
-
-        - name: Добавить репозиторий Docker
-          shell: sudo install -m 0755 -d /etc/apt/keyrings & curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg & sudo chmod a+r /etc/apt/keyrings/docker.gpg
-          become: yes
 
         - name: Update apt and install docker-ce
           apt:
